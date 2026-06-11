@@ -1,45 +1,45 @@
-# Pipeline Giám Sát Đám Đông và Phát Hiện Bất Thường (Crowd Tracking & Loitering Detection)
+# Crowd Monitoring and Loitering Detection Pipeline
 
-## Tổng Quan Dự Án
-Dự án này triển khai hệ thống giám sát thời gian thực sử dụng trí tuệ nhân tạo để phát hiện, theo dõi, đếm người đi qua khu vực địa lý (Geofencing) và phát hiện hành vi lảng vảng (Loitering). Hệ thống kết hợp sức mạnh của YOLOv8 (phát hiện đối tượng) và thuật toán ByteTrack (theo dõi đa đối tượng) với logic kiểm tra dựa trên vận tốc và khu vực để phát hiện bất thường.
+## Project Overview
+This project implements a real-time surveillance system using artificial intelligence to detect, track, count people crossing through geofenced areas, and detect loitering behavior. The system combines the power of YOLOv8 (object detection) and ByteTrack algorithm (multi-object tracking) with velocity and region-based logic to detect anomalies.
 
-### Các Tính Năng Được Cải Tiến & Mô-đun Hóa
-- **Theo dõi đối tượng (Tracking):** Sử dụng YOLOv8 và ByteTrack để phát hiện và gán ID ổn định cho mỗi người.
-- **Geofencing (Hàng rào ảo):** Đếm số lượng người thuộc khu vực địa lý (Polygon) linh hoạt.
-- **Phát hiện lảng vảng (Loitering):** Phát hiện người đứng quá lâu hoặc bám trụ tại một khu vực với tốc độ di chuyển cực thấp dựa vào thời gian định mức.
-- **Thiết kế mô-đun:** Dễ dàng bảo trì, phát triển và chạy riêng biệt từng chức năng qua cấu trúc lệnh trên Terminal.
+### Enhanced Features & Modularity
+- **Object Tracking:** Uses YOLOv8 and ByteTrack to detect and assign stable IDs to each person.
+- **Geofencing (Virtual Fence):** Flexibly count people in geographic areas (polygons).
+- **Loitering Detection:** Detect people staying too long or remaining in an area with extremely low movement speed based on time thresholds.
+- **Modular Design:** Easy to maintain, develop, and run individual functions through command-line structure in Terminal.
 
-## Yêu Cầu Hệ Thống
+## System Requirements
 - Python 3.8+
-- Webcam hoặc camera IP (cho video thời gian thực)
-- RAM: 4GB+ (khuyến nghị 8GB)
-- GPU: Tùy chọn (cho tốc độ cao hơn)
+- Webcam or IP camera (for real-time video)
+- RAM: 4GB+ (8GB recommended)
+- GPU: Optional (for higher performance)
 
-## Cài Đặt
+## Installation
 
 ### 1. Clone Repository
 ```bash
 https://github.com/TLio2407/AI-Powered-Smart-Home-Surveillance-and-Crowd-Management-System.git```
 
-### 2. Tạo Virtual Environment
+### 2. Create Virtual Environment
 ```bash
 python3 -m venv venv
-# Trên Windows:
+# On Windows:
 venv\Scripts\activate
-# Trên Linux/Mac:
+# On Linux/Mac:
 source venv/bin/activate
 ```
 
-### 3. Cài Đặt Dependencies
+### 3. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-## Hướng Dẫn Sử Dụng
+## Usage Guide
 
-Mã nguồn chính của hệ thống nằm trong thư mục `BytetrackCountingLoitering/` và phần web backend nằm trong thư mục `web/`.
+The main source code of the system is located in the `BytetrackCountingLoitering/` folder and the web backend is located in the `web/` folder.
 
-Để khởi động hệ thống (Redis, backend và các Celery worker), chạy các lệnh sau trên 4 terminal riêng biệt:
+To start the system (Redis, backend and Celery workers), run the following commands on 4 separate terminals:
 
 Run:
 
@@ -57,68 +57,68 @@ python -m celery -A web.app.core.celery_app worker --loglevel=INFO --pool=solo -
 python -m celery -A web.app.core.celery_app worker --loglevel=INFO --pool=solo -Q alert_queue,notification_queue,hardware_queue,stats_queue
 ```
 
-Ghi chú:
-- Chạy Redis trước khi start backend và worker.
-- Trên Windows, giữ các terminal mở để xem log; dùng PowerShell hoặc CMD được cấu hình môi trường ảo nếu cần.
+Notes:
+- Run Redis before starting backend and workers.
+- On Windows, keep terminals open to view logs; use PowerShell or CMD with virtual environment enabled if needed.
 
-## Cấu Trúc Dự Án
-Tóm tắt cấu trúc thư mục chính trong repository (chỉ liệt kê các mục quan trọng):
+## Project Structure
+Summary of the main folder structure in the repository (only important items listed):
 
 ```
 .
-├── BytetrackCountingLoitering/    # Pipeline tracking & loitering (core)
-├── CrowdCounting/                  # Các mô-đun đếm thử nghiệm
+├── BytetrackCountingLoitering/    # Tracking & loitering pipeline (core)
+├── CrowdCounting/                  # Experimental counting modules
 ├── web/                            # Web backend, API, Celery tasks, frontend assets
 │   ├── app/
 │   ├── frontend/
 │   └── docker-compose.yml
 ├── requirements.txt
 ├── README.md
-└── yolov8s.pt                       # Mô hình YOLOv8 mẫu
+└── yolov8s.pt                       # Sample YOLOv8 model
 ```
 
-Thư mục `web/` chứa backend FastAPI, Celery worker, cấu hình Docker và frontend tĩnh (`web/frontend/`).
+The `web/` folder contains FastAPI backend, Celery worker, Docker configuration and static frontend (`web/frontend/`).
 
-Chi tiết cấu trúc bên trong `web/app/`:
+Detailed structure inside `web/app/`:
 
 ```
 web/app/
 ├── __init__.py
 ├── main.py                  # FastAPI app entrypoint
-├── adapters/                # Adapter cho AI, camera, hardware, notifier
-│   ├── ai/                  # Các implementation AI (factory, mock, model wrappers)
+├── adapters/                # Adapters for AI, camera, hardware, notifier
+│   ├── ai/                  # AI implementations (factory, mock, model wrappers)
 │   ├── camera/              # Camera adapters (video file, mock, hardware clients)
-│   ├── hardware/            # Giao tiếp với thiết bị phần cứng
+│   ├── hardware/            # Hardware device communication
 │   └── notifier/            # Notifier implementations (e.g., Telegram)
-├── api/                     # Các route FastAPI (routes_*.py)
+├── api/                     # FastAPI routes (routes_*.py)
 ├── core/                    # Core app: `celery_app.py`, `config.py`, `database.py`, `redis.py`
 ├── models/                  # ORM/DB models (e.g., SQLAlchemy)
-├── schemas/                 # Pydantic schemas cho request/response
-├── services/                # Business logic và service layer
+├── schemas/                 # Pydantic schemas for request/response
+├── services/                # Business logic and service layer
 ├── tasks/                   # Celery tasks (alert_tasks, stream_tasks, stats_tasks,...)
 ├── ws/                      # WebSocket routes/handlers
 └── static/                  # Static assets: `app.js`, `style.css`, snapshots/
 ```
 
-Gợi ý chỉnh sửa/quan sát nhanh:
-- Entrypoint API: `web/app/main.py` (khởi tạo FastAPI + mount các router).
-- Cấu hình Celery: `web/app/core/celery_app.py` và các task trong `web/app/tasks/`.
-- Thêm/điều chỉnh biến môi trường trong `web/.env` và `web/.env.example`.
-- Nếu muốn mở rộng adapter hoặc thêm camera mới, bắt đầu từ `web/app/adapters/camera/`.
+Quick editing/observation tips:
+- API Entrypoint: `web/app/main.py` (initializes FastAPI + mounts routers).
+- Celery Configuration: `web/app/core/celery_app.py` and tasks in `web/app/tasks/`.
+- Add/adjust environment variables in `web/.env` and `web/.env.example`.
+- To extend adapters or add new cameras, start from `web/app/adapters/camera/`.
 
-## Ghi Chú Quan Trọng
-- **Docker & Redis:** file `web/docker-compose.yml` có dịch vụ `redis` — khởi động Redis trước khi chạy backend/celery (ví dụ lệnh trong phần Hướng Dẫn Sử Dụng).
-- **Biến môi trường:** sao chép `web/.env.example` sang `web/.env` và điều chỉnh nếu cần trước khi khởi động services.
-- **Chạy trên Windows:** dùng PowerShell/ CMD đã kích hoạt virtualenv hoặc Docker Desktop; giữ các terminal mở để xem logs.
-- **Celery:** Celery dùng Redis làm broker (mặc định) — đảm bảo Redis reachable từ worker; các queue được tách theo nhiệm vụ (stream_queue, alert_queue, ...).
-- **Tuỳ chỉnh tham số:** `BytetrackCountingLoitering/config.py` chứa các ngưỡng, tọa độ polygon và tham số loitering.
+## Important Notes
+- **Docker & Redis:** The file `web/docker-compose.yml` contains the `redis` service — start Redis before running backend/celery (see commands in the Usage Guide section).
+- **Environment Variables:** Copy `web/.env.example` to `web/.env` and adjust if needed before starting services.
+- **Running on Windows:** Use PowerShell/CMD with virtual environment activated or Docker Desktop; keep terminals open to view logs.
+- **Celery:** Celery uses Redis as a broker (by default) — ensure Redis is reachable from workers; queues are separated by task (stream_queue, alert_queue, ...).
+- **Customize Parameters:** `BytetrackCountingLoitering/config.py` contains thresholds, polygon coordinates and loitering parameters.
 
-## Kế Hoạch Phát Triển (To-do)
-- **1. Dockerize full stack (high):** tạo image cho backend, worker và hướng dẫn deploy (compose/stack).
-- **2. API/Streaming (high):** bổ sung API trả kết quả stream theo thời gian thực và websocket cho frontend.
-- **3. Tự động hóa & CI (medium):** tests unit cho pipeline, linting, pipeline CI/CD cơ bản.
-- **4. Quản lý mô hình (medium):** thêm script tải/kiểm tra phiên bản mô hình, storage cho checkpoints.
-- **5. Cải thiện phát hiện (low):** thêm logic phát hiện ngã, chạy tán loạn, tối ưu tham số theo dữ liệu thực tế.
+## Development Roadmap (To-do)
+- **1. Dockerize full stack (high):** create images for backend, worker and deployment instructions (compose/stack).
+- **2. API/Streaming (high):** add APIs returning stream results in real-time and websockets for frontend.
+- **3. Automation & CI (medium):** unit tests for pipeline, linting, basic CI/CD pipeline.
+- **4. Model Management (medium):** add scripts to download/check model versions, storage for checkpoints.
+- **5. Improve Detection (low):** add fall detection logic, crowd run detection, optimize parameters based on real data.
 
-## Giấy Phép
-Dự án sử dụng đa phần là các thư viện mã nguồn mở phân phối miễn phí theo quy định của YOLOv8 và chuẩn thư viện Python mở khác. Vui lòng tuân thủ bản quyền của thư viện bên thứ ba đang được áp dụng.
+## License
+The project uses mostly open-source libraries distributed freely under YOLOv8 and other open Python library standards. Please comply with the copyrights of third-party libraries being applied.
